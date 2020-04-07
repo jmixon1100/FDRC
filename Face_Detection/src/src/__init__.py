@@ -13,8 +13,8 @@ def getDirections(xcords):
         return ("left")
     else:
         return ("center")
-    
-cap = cv2.VideoCapture(0)
+webcam = int(input("Enter (0) if no local webcam, Enter (1) other wise): "))  
+cap = cv2.VideoCapture(webcam)
 
 dirfr = ""
 dirf = ""
