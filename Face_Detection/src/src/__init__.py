@@ -1,18 +1,24 @@
 import numpy as np
-
 import cv2
 from cv2 import cvtColor
-
 from PIL import ImageGrab
 import win32gui
-
 import time
+import serial
 
+arduino = serial.Serial('com3',9600, timeout = 0.3)
 casc = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_default.xml')
 side_casc = cv2.CascadeClassifier('cascades/data/haarcascade_profileface.xml')
 
 templist = []
 otherlist = []
+def send_directions(direction):
+    if direction == "left":
+        arduino.write('1')
+    elif directon == "right":
+        arduino.write('2')
+    else:
+        arduino.write('3')
 
 def enum_win(hwnd, result):
     #print(hwnd)
@@ -25,6 +31,7 @@ def enum_win(hwnd, result):
     
 def getDirections(xcords):
     if xcords > 380:
+        
         return ("right")
     elif xcords < 250:
         return ("left")
@@ -44,7 +51,7 @@ for (hwnd,winText) in otherlist:
         
 start, end = 0,0    
 while(True):   
-    start = int(round(time.time() * 1000)) # <---------------------
+    #start = int(round(time.time() * 1000)) # <---------------------
     
     winPos = win32gui.GetWindowRect(screen_hwnd)
     
@@ -87,7 +94,8 @@ while(True):
             continue
         else:
             dirfr = dir1
-            print (dirfr)
+            send_directions(dirFr)
+            print(dirfr)
              
     for (x,y,w,h) in faces:
         cv2.rectangle(frame,(x,y),(x + w,y + h),(255,0,0),2)
@@ -99,6 +107,7 @@ while(True):
             continue
         else:
             dirf = dir1
+            send_directions(dirf)
             print (dirf)
          
          
@@ -112,6 +121,7 @@ while(True):
             continue
         else:
             dirs = dir1
+            send_directions(dirs)
             print (dirs)
     #shows window
     cv2.imshow('output', frame)
@@ -121,6 +131,6 @@ while(True):
     if cv2.waitKey(20) & 0xFF == ord('q'):
         break
     
-    end = int(round(time.time() * 1000)) # <--------------------
+    #end = int(round(time.time() * 1000)) # <--------------------
     print(end - start)
 cv2.destroyAllWindows()
