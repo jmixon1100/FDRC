@@ -6,19 +6,22 @@ import win32gui
 import time
 import serial
 
-arduino = serial.Serial('com3',9600, timeout = 0.3)
+arduino = serial.Serial('com3',baudrate= 9600)
 casc = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_default.xml')
 side_casc = cv2.CascadeClassifier('cascades/data/haarcascade_profileface.xml')
 
 templist = []
 otherlist = []
+
+
 def send_directions(direction):
     if direction == "left":
-        arduino.write('1')
-    elif directon == "right":
-        arduino.write('2')
+        arduino.write(b'1')
+    elif direction == "right":
+        arduino.write(b'2')
     else:
-        arduino.write('3')
+        arduino.write(b'3')
+        
 
 def enum_win(hwnd, result):
     #print(hwnd)
@@ -31,7 +34,6 @@ def enum_win(hwnd, result):
     
 def getDirections(xcords):
     if xcords > 380:
-        
         return ("right")
     elif xcords < 250:
         return ("left")
@@ -79,8 +81,9 @@ while(True):
     side = side_casc.detectMultiScale(gs, scaleFactor=1.5,minNeighbors=5)
     
     # loop for drawing box around faces detected on a side profile
+    flag = False
     for (x,y,w,h) in face_right:
-         
+        flag = True 
         # calculating x since the frame the faces being detected have been flipped
         nx = (2 * h) - x 
         # formula for calculating x that has been flipped over a vertical line        
@@ -94,10 +97,11 @@ while(True):
             continue
         else:
             dirfr = dir1
-            send_directions(dirFr)
+            send_directions(dirfr)
             print(dirfr)
              
     for (x,y,w,h) in faces:
+        flag = True
         cv2.rectangle(frame,(x,y),(x + w,y + h),(255,0,0),2)
          
         dotPos = x + (w//2)
@@ -112,6 +116,7 @@ while(True):
          
          
     for (x,y,w,h) in side:
+        flag = True
         cv2.rectangle(frame,(x,y),(x + w,y + h),(0,255,0),2)
          
         dotPos = x + (w//2)
@@ -128,9 +133,11 @@ while(True):
     
     
     #press q to close window
+    
     if cv2.waitKey(20) & 0xFF == ord('q'):
         break
     
     #end = int(round(time.time() * 1000)) # <--------------------
-    print(end - start)
+    #print(end - start)
+arduino.close()
 cv2.destroyAllWindows()
