@@ -1,10 +1,8 @@
 import numpy as np
-import cv2
+import cv2, win32gui, time, serial
 from cv2 import cvtColor
 from PIL import ImageGrab
-import win32gui
-import time
-import serial
+
 
 arduino = serial.Serial('com3',baudrate= 9600)
 casc = cv2.CascadeClassifier('cascades/data/haarcascade_frontalface_default.xml')
@@ -12,7 +10,6 @@ side_casc = cv2.CascadeClassifier('cascades/data/haarcascade_profileface.xml')
 
 templist = []
 otherlist = []
-
 
 def send_directions(direction):
     if direction == "left":
@@ -22,7 +19,6 @@ def send_directions(direction):
     else:
         arduino.write(b'3')
         
-
 def enum_win(hwnd, result):
     #print(hwnd)
     
@@ -52,7 +48,7 @@ for (hwnd,winText) in otherlist:
             screen_hwnd = hwnd
         
 start, end = 0,0    
-while(True):   
+while 1:   
     #start = int(round(time.time() * 1000)) # <---------------------
     
     winPos = win32gui.GetWindowRect(screen_hwnd)
@@ -102,8 +98,7 @@ while(True):
              
     for (x,y,w,h) in faces:
         flag = True
-        cv2.rectangle(frame,(x,y),(x + w,y + h),(255,0,0),2)
-         
+        cv2.rectangle(frame,(x,y),(x + w,y + h),(255,0,0),2)  
         dotPos = x + (w//2)
         dir1 = getDirections(dotPos)
          
@@ -118,19 +113,19 @@ while(True):
     for (x,y,w,h) in side:
         flag = True
         cv2.rectangle(frame,(x,y),(x + w,y + h),(0,255,0),2)
-         
         dotPos = x + (w//2)
         dir1 = getDirections(dotPos)
          
         if dir1 == dirs:
             continue
+            
         else:
             dirs = dir1
             send_directions(dirs)
             print (dirs)
+            
     #shows window
     cv2.imshow('output', frame)
-    
     
     #press q to close window
     
@@ -139,5 +134,6 @@ while(True):
     
     #end = int(round(time.time() * 1000)) # <--------------------
     #print(end - start)
+    
 arduino.close()
 cv2.destroyAllWindows()
